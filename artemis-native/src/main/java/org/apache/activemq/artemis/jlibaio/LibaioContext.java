@@ -16,6 +16,9 @@
  */
 package org.apache.activemq.artemis.jlibaio;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +45,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class LibaioContext<Callback extends SubmitInfo> implements Closeable {
 
+   private static final Logger logger = LoggerFactory.getLogger(LibaioContext.class);
+
    private static final AtomicLong totalMaxIO = new AtomicLong(0);
 
    /**
@@ -65,13 +70,13 @@ public class LibaioContext<Callback extends SubmitInfo> implements Closeable {
       try {
          System.loadLibrary(name);
          if (getNativeVersion() != EXPECTED_NATIVE_VERSION) {
-            NativeLogger.LOGGER.incompatibleNativeLibrary();
+            logger.error("Incompatible native library found");
             return false;
          } else {
             return true;
          }
       } catch (Throwable e) {
-         NativeLogger.LOGGER.debug(name + " -> error loading the native library", e);
+         logger.debug(name + " -> error loading the native library", e);
          return false;
       }
 
@@ -92,12 +97,12 @@ public class LibaioContext<Callback extends SubmitInfo> implements Closeable {
             });
             break;
          } else {
-            NativeLogger.LOGGER.debug("Library " + library + " not found!");
+            logger.debug("Library " + library + " not found!");
          }
       }
 
       if (!loaded) {
-         NativeLogger.LOGGER.debug("Couldn't locate LibAIO Wrapper");
+         logger.debug("Couldn't locate LibAIO Wrapper");
       }
    }
 
@@ -236,7 +241,7 @@ public class LibaioContext<Callback extends SubmitInfo> implements Closeable {
             try {
                ioSpace.tryAcquire(queueSize, 10, TimeUnit.SECONDS);
             } catch (Exception e) {
-               NativeLogger.LOGGER.error(e);
+               logger.error("Could not close", e);
             }
          }
          totalMaxIO.addAndGet(-queueSize);
@@ -347,9 +352,9 @@ public class LibaioContext<Callback extends SubmitInfo> implements Closeable {
    /**
     * It will start polling and will keep doing until the context is closed.
     * This will call callbacks on {@link SubmitInfo#onError(int, String)} and
-    * {@link SubmitInfo#done()}.
+    * {@link SubmitInfo#done(int)}.
     * In case of error, both {@link SubmitInfo#onError(int, String)} and
-    * {@link SubmitInfo#done()} are called.
+    * {@link SubmitInfo#done(int)} are called.
     */
    public void poll() {
       if (!closed.get()) {
@@ -360,8 +365,8 @@ public class LibaioContext<Callback extends SubmitInfo> implements Closeable {
    /**
     * Called from the native layer
     */
-   private void done(SubmitInfo info) {
-      info.done();
+   private void done(SubmitInfo info, int retval) {
+      info.done(retval);
       if (ioSpace != null) {
          ioSpace.release();
       }

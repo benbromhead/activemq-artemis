@@ -189,7 +189,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
            return JNI_ERR;
         }
 
-        doneMethod = (*env)->GetMethodID(env, submitClass, "done", "()V");
+        doneMethod = (*env)->GetMethodID(env, submitClass, "done", "(I)V");
         if (doneMethod == NULL) {
            return JNI_ERR;
         }
@@ -200,7 +200,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         }
         libaioContextClass = (jclass)(*env)->NewGlobalRef(env, (jobject)libaioContextClass);
 
-        libaioContextDone = (*env)->GetMethodID(env, libaioContextClass, "done", "(Lorg/apache/activemq/artemis/jlibaio/SubmitInfo;)V");
+        libaioContextDone = (*env)->GetMethodID(env, libaioContextClass, "done", "(Lorg/apache/activemq/artemis/jlibaio/SubmitInfo;I)V");
         if (libaioContextDone == NULL) {
            return JNI_ERR;
         }
@@ -627,7 +627,7 @@ JNIEXPORT void JNICALL Java_org_apache_activemq_artemis_jlibaio_LibaioContext_bl
             putIOCB(theControl, iocbp);
 
             if (obj != NULL) {
-                (*env)->CallVoidMethod(env, theControl->thisObject, libaioContextDone,obj);
+                (*env)->CallVoidMethod(env, theControl->thisObject, libaioContextDone,obj,(jint)eventResult);
                 // We delete the globalRef after the completion of the callback
                 (*env)->DeleteGlobalRef(env, obj);
             }

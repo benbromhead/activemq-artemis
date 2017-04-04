@@ -71,7 +71,7 @@ public class CallbackCachelTest {
       }
 
       @Override
-      public void done() {
+      public void done(int retval) {
 
       }
 

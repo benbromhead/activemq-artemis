@@ -45,17 +45,20 @@ public class LibaioTest {
 
    @BeforeClass
    public static void testAIO() {
-      Assume.assumeTrue(LibaioContext.isLoaded());
-
-      File parent = new File("./target");
+//      Assume.assumeTrue(LibaioContext.isLoaded());
+      LibaioContext.isLoaded();
+      File parent = new File("/home/ubuntu");
       File file = new File(parent, "testFile");
 
       try {
          parent.mkdirs();
 
          boolean failed = false;
-         try (LibaioContext control = new LibaioContext<>(1, true, true); LibaioFile fileDescriptor = control.openFile(file, true)) {
+         try {
+            LibaioContext control = new LibaioContext<>(1, true, true);
+            LibaioFile fileDescriptor = control.openFile(file, true);
             fileDescriptor.fallocate(4 * 1024);
+            control.close();
          } catch (Exception e) {
             e.printStackTrace();
             failed = true;
@@ -100,7 +103,7 @@ public class LibaioTest {
          *  - This would fill up /tmp in case of failures.
          *  - target is cleaned up every time you do a mvn clean, so it's safer
          */
-      File parent = new File("./target");
+      File parent = new File("/home/ubuntu");
       parent.mkdirs();
       temporaryFolder = new TemporaryFolder(parent);
    }
@@ -658,7 +661,7 @@ public class LibaioTest {
          }
 
          @Override
-         public void done() {
+         public void done(int retval) {
             latch.countDown();
          }
       }
@@ -738,7 +741,7 @@ public class LibaioTest {
       }
 
       @Override
-      public void done() {
+      public void done(int retval) {
       }
 
       public int getErrno() {

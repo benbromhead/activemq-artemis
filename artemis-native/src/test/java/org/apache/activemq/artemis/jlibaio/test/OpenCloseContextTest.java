@@ -42,7 +42,7 @@ public class OpenCloseContextTest {
    public TemporaryFolder folder;
 
    public OpenCloseContextTest() {
-      folder = new TemporaryFolder(new File("./target"));
+      folder = new TemporaryFolder(new File("/home/ubuntu"));
    }
 
    @Test
@@ -72,7 +72,7 @@ public class OpenCloseContextTest {
             }
 
             @Override
-            public void done() {
+            public void done(int retval) {
                insideMethod.countDown();
                try {
                   awaitInside.await();
@@ -91,7 +91,7 @@ public class OpenCloseContextTest {
             }
 
             @Override
-            public void done() {
+            public void done(int retval) {
             }
          });
 
@@ -130,7 +130,7 @@ public class OpenCloseContextTest {
             }
 
             @Override
-            public void done() {
+            public void done(int retval) {
                insideMethod.countDown();
                try {
                   awaitInside.await(100, TimeUnit.MILLISECONDS);
@@ -149,7 +149,7 @@ public class OpenCloseContextTest {
             }
 
             @Override
-            public void done() {
+            public void done(int retval) {
             }
          });
 

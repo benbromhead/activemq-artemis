@@ -16,6 +16,9 @@
  */
 package org.apache.activemq.artemis.jlibaio;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -23,6 +26,9 @@ import java.nio.ByteBuffer;
  * This is an extension to use libaio.
  */
 public final class LibaioFile<Callback extends SubmitInfo> implements AutoCloseable {
+
+   private static final Logger logger = LoggerFactory.getLogger(LibaioFile.class);
+
 
    protected boolean open;
    /**
@@ -120,7 +126,7 @@ public final class LibaioFile<Callback extends SubmitInfo> implements AutoClosea
       try {
          LibaioContext.fill(fd, size);
       } catch (OutOfMemoryError e) {
-         NativeLogger.LOGGER.debug("Didn't have enough memory to allocate " + size + " bytes in memory, using simple fallocate");
+         logger.debug("Didn't have enough memory to allocate " + size + " bytes in memory, using simple fallocate");
          LibaioContext.fallocate(fd, size);
       }
    }

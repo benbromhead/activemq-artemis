@@ -21,5 +21,5 @@ public interface SubmitInfo {
 
    void onError(int errno, String message);
 
-   void done();
+   void done(int retval);
 }
